@@ -12,7 +12,7 @@ def make_builder(dat, name = None):
     '''
     builder_objects = dict()
     if name is None:
-        name = dat.items()[0][0]
+        name = list(dat.items())[0][0]
 
     top = walk_builder_config_graph(dat, name, builder_objects)
     return top
@@ -26,8 +26,8 @@ def walk_builder_config_graph(dat, bname, builder_objects):
 
     try:
         bdat = dat[bname]
-    except KeyError,e:
-        print 'No such builder configuration section: "bname"' % bname
+    except KeyError:
+        print ('No such builder configuration section: "bname"' % bname)
         raise
     klass = bdat.pop('class')   # make exactly one instance
     bobj = klass(bname)

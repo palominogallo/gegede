@@ -81,7 +81,7 @@ def make_material_node(obj):
             node.append(etree.Element('fraction', ref=isoname, n=str(isofrac)))
 
     if typename == 'Amalgam':
-        node = etree.Element('material', name=obj.name, Z=float(obj.z))
+        node = etree.Element('material', name=obj.name, Z=str(float(obj.z)))
         # fixme: units???
         node.append(etree.Element('D', value=D(obj)))
         node.append(etree.Element('atom', value=Atom(obj)))
@@ -165,7 +165,7 @@ def make_shape_node(shape):
     return
 
 def make_volume_node(vol, store):
-    #print 'VOL',vol
+    #print ('VOL',vol)
     node_type = 'volume'
     if vol.material is None and vol.shape is None:
         node = etree.Element('assembly', name=vol.name)
@@ -265,14 +265,20 @@ def convert(geom):
 
 
 def validate(text):
-    from StringIO import StringIO
+    try:
+        from StringIO import StringIO
+        sio = StringIO(text)
+    except ImportError:         # python3
+        from io import BytesIO
+        sio = BytesIO(text)
+
     xsd_doc = etree.parse(schema_file)
     xsd = etree.XMLSchema(xsd_doc)
-    xml = etree.parse(StringIO(text))
+    xml = etree.parse(sio)
     okay = xsd.validate(xml)
     if not okay:
-        print xsd.error_log
-        raise ValueError, 'Invalid GDML'
+        print (xsd.error_log)
+        raise ValueError('Invalid GDML')
     return True
 
 def validate_object(obj):
@@ -286,7 +292,7 @@ def dumps(obj):
     Return a string representation of the object returned by convert.
     '''
     xml = etree.tostring(obj, pretty_print = True, xml_declaration = True)
-    xml = xml.replace("'",'"')  # work around ROOT GDML import bug....
+    xml = xml.replace(b"'",b'"')  # work around ROOT GDML import bug....
     # don't validate here
     return xml
 
@@ -294,4 +300,4 @@ def output(obj, filename):
     '''
     Save to file
     '''
-    open(filename,'w').write(dumps(obj))
+    open(filename,'wb').write(dumps(obj))

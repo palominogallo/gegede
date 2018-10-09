@@ -45,12 +45,13 @@ def generate_geometry(wbuilder):
     Return a geometry object generated from the given configuration file(s).
     '''
     import gegede.construct
+    import gegede.builder
 
     geom = gegede.construct.Geometry()
     gegede.builder.construct(wbuilder, geom)
     assert len(wbuilder.volumes) == 1, 'Top level builder "%s" must only produce one LV, produced %d' % (wbuilder.name, len(wbuilder.volumes))
     geom.set_world(wbuilder.get_volume(0))
-    print 'Generated world "%s"' % geom.world
+    print ('Generated world "%s"' % geom.world)
     # fixme: here would be a good time to do some internal validation
     return geom
 
@@ -105,7 +106,7 @@ def main ():
         gegede.validation.validate(geom)
     from gegede.export import Exporter
     exporter = Exporter(args.format)
-    print 'Converting with module: %s' % exporter.mod
+    print ('Converting with module: %s' % exporter.mod)
 
     obj = exporter.convert(geom)
     if args.validate_object:
@@ -118,3 +119,6 @@ def main ():
     return
 
 
+if '__main__' == __name__:
+    main()
+    

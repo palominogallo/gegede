@@ -3,7 +3,7 @@
 Some functions to help process the schema
 '''
 from collections import OrderedDict, namedtuple
-from types import isquantity, toquantity
+from .types import isquantity, toquantity
 
 def make_converter(proto):
     '''Return a function that will convert its argument using <proto> as a
@@ -19,9 +19,9 @@ def make_converter(proto):
         def tostr(other):
             other = str(other)
             if other == "":
-                raise ValueError, 'Empty string is an illegal value for str'
+                raise ValueError('Empty string is an illegal value for str')
             if other is None:
-                raise ValueError, 'None is an illegal value for str'
+                raise ValueError('None is an illegal value for str')
             return other
         return tostr
 
@@ -51,7 +51,7 @@ def validate_input(proto, *args, **kwargs):
 
     A an ordered list of values are returned.
     '''
-    #print 'VALIDATE INPUT', str(proto)
+    #print ('VALIDATE INPUT', str(proto))
 
     members = OrderedDict()
     converters = dict()
@@ -59,13 +59,13 @@ def validate_input(proto, *args, **kwargs):
         c = make_converter(pval)
         converters[name] = c
 
-        #print 'CONVERTER:',name,c,pval
+        #print ('CONVERTER:',name,c,pval)
 
         # set default
         if isquantity(pval):
             members[name] = c(pval)
         elif hasattr(pval, 'default'):
-            #print 'SET DEFAULT:',name,pval.default
+            #print ('SET DEFAULT:',name,pval.default)
             members[name] = pval.default()
         else:
             members[name] = None
@@ -78,16 +78,16 @@ def validate_input(proto, *args, **kwargs):
     already = list()
     for k,v in zip(members.keys(), args):
         members[k] = converters[k](v)
-        #print 'ARGS:',k,v,members[k]
+        #print ('ARGS:',k,v,members[k])
         already.append(k)
 
     for k,v in kwargs.items():
         if k not in converters.keys():
-            raise ValueError, 'Object "%s" not in prototype' % (k,)
+            raise ValueError('Object "%s" not in prototype' % (k,))
         if k in already:
-            raise ValueError, 'Keyword argument already supplied as positional: %s' % k
+            raise ValueError('Keyword argument already supplied as positional: %s' % k)
         members[k] = converters[k](v)
-        #print 'KWDS:',k,v,members[k]
+        #print ('KWDS:',k,v,members[k])
 
     return members.values()
     
@@ -105,15 +105,15 @@ def make_maker(collector, ntname, *proto):
             objname = "%s%06d" % (ntname, len(collector))
 
         if objname in collector:
-            raise ValueError, 'Instance "%s" of type %s already in %s' % \
-                (objname, ntname, collector)
+            raise ValueError('Instance "%s" of type %s already in %s' % \
+                (objname, ntname, collector))
 
         members = validate_input(proto, *args, **kwargs)
 
         NTT = namedtuple(ntname, ['name'] + member_names)
         obj = NTT(objname, *members)
         collector[objname] = obj
-        #print 'INSTANTIATED:', obj
+        #print ('INSTANTIATED:', obj)
         return obj
     instantiator.__name__ = ntname
     instantiator.__doc__ = "%s: %s" % (ntname, ', '.join(member_names))

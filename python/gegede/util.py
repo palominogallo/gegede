@@ -14,11 +14,12 @@ def wash_units(obj, lunit='cm', aunit='radian'):
     used = dict()
     for k,v in zip(obj._fields, obj):
         if type(v) == Quantity:
-            if 'meter' in v.to_base_units().units:
+            base_units = v.to_base_units().units
+            if 'meter' == base_units:
                 used['lunit'] = lunit
                 ret[k] = v.to(lunit).magnitude
                 continue
-            if 'radian' in v.to_base_units().units:
+            if 'radian' == base_units:
                 used['aunit'] = aunit
                 ret[k] = v.to(aunit).magnitude
                 continue
@@ -38,13 +39,13 @@ def list_match(values, entry = None, deref = lambda x: x):
 
     O.w. assume str and first try exact match otherwise interpret as regexp and return values matching deref(value).
     '''
-    #print "list_match(%s,%s)" % (', '.join(['%s:%s' % (type(v),v.name) for v in values]), entry)
+    #print ("list_match(%s,%s)" % (', '.join(['%s:%s' % (type(v),v.name) for v in values]), entry))
 
     if entry is None:
-        return values
+        return list(values)
 
     if isinstance(entry, int):
-        return [values[entry]]
+        return [list(values)[entry]]
 
     if callable(entry):
         ret = list()
@@ -68,5 +69,5 @@ def list_match(values, entry = None, deref = lambda x: x):
         if rx.search(deref(v)) is None:
             continue
         ret.append(v)
-    return ret
+    return list(ret)
 
